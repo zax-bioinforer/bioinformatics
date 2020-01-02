@@ -1,2 +1,10 @@
 The workflow is for RNA-seq.
 It contains several different pipelines.
+
+
+
+##DGE
+##the first pipeline 
+##STAR/TopHat/HISAT---->HTSeq/featureCounts----->TMM---->edgeR/DESeq2/limma+voom
+
+

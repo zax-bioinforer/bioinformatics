@@ -1,0 +1,35 @@
+
+
+##This is a script to make a multiple Fastqc!
+
+##First move all fq.gz file to a folder/or a workplace
+mv */*.fq.gz ./(or the path you want)
+
+##If the file type is not fq.gz ,you should try to convert them to fq.gz
+##Then you can run fastqc 
+##I put the results to a folder called result
+
+for fastq_file in ./*.fq.gz
+do
+    fastqc $fastq_file
+       mv ./*fastqc.html ./*fastqc.zip ./result/
+done
+echo "Ok!"
+
+##But fatqc do not stat the Q30 and Q20 ,so I run fqcheck to get the feature of the data
+
+for fastq_file in ./*/*.fq.gz
+do
+    /ifs1/Software/bin/fqcheck  -r $fastq_file -c ./fqcheck/${fastq_file}.fqcheck
+done
+echo "Ok!"
+
+
+##At last, I extract the index of the data 
+
+for fastq_file in ./*.fq.gz.fqcheck
+do
+    echo $fastq_file
+    cat $fastq_file | awk 'END {print}'
+done
+echo "Ok!"

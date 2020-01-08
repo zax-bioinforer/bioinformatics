@@ -1,0 +1,51 @@
+#the first multiqc sometimes can't calculate the Q20 and Q30,so here comes the multi_qc v2.0.
+#it runs a tool created by BGI ,called iTools.
+
+#first,run the multi-calculating script of iTools
+##NOTICE: CPU should be not too many,or maybe it will break down!
+for fq in *.fq.gz 
+do
+    echo $fq
+     ~/software/Reseqtools/iTools_Code/bin/iTools Fqtools  stat  -InFq $fq -OutStat ./result/${fq}.stat -CPU 8
+done
+
+echo "ok~~!"
+
+
+##Then you get the ".stat" files,extract the information you want,thenmerge them.
+
+for fastq_file in *.stat
+do
+   sed -n '1,3p' $fastq_file > ${fastq_file}.part1
+   sed -n '11,12p' $fastq_file > ${fastq_file}.part2
+   cat ${fastq_file}.part* > ${fastq_file}.merge.txt
+done
+cat *merge* > merge.txt
+echo "Ok!"
+
+##After it's down, a merged txt is here,I use R to deal with the file
+
+library(data.table)
+library(stringr)
+setwd("C://Users/Admin/Desktop/")
+
+data <- fread("merge.csv")
+summary(data)
+y <- data.frame()
+for (i in 1:30) {
+    j <- 5*(i-1)
+    sample <- gsub("##$","",data[1+j,1])
+    sample <- gsub("^##","",sample)
+    
+    
+    ReadNum <- gsub("#ReadNum:","",data[2+j,1])
+    BaseNum <- gsub("BaseNum:","",data[2+j,2])
+    GC <- gsub("#GC%:","",data[3,1])
+    Q20 <- gsub(">Q20:","",data[4+j,2])
+    Q30 <- gsub(">Q30:","",data[5+j,2])
+    x <- data.frame(sample,ReadNum,BaseNum,GC,Q20,Q30)
+    y <- rbind(y,x)
+}
+write.csv(y,"qc.csv")
+
+##Next time, the script will be interface standardized, change the interfaces, it can just run smoothly.
